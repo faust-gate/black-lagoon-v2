@@ -2,8 +2,14 @@
 import { spawn } from "node:child_process";
 
 const children = [
-  spawn("npm", ["run", "dev", "-w", "server"], { stdio: "inherit", shell: true }),
-  spawn("npm", ["run", "dev", "-w", "client"], { stdio: "inherit", shell: true }),
+  spawn("npm", ["run", "dev", "-w", "server"], {
+    stdio: "inherit",
+    shell: true,
+  }),
+  spawn("npm", ["run", "dev", "-w", "client"], {
+    stdio: "inherit",
+    shell: true,
+  }),
 ];
 
 function stop(signal: NodeJS.Signals): void {

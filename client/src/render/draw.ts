@@ -179,18 +179,20 @@ function drawShip(
     // 1. Контурне коло навколо літака
     ctx.beginPath();
     ctx.arc(0, 0, 24, 0, Math.PI * 2);
-    ctx.strokeStyle = ship.own ? "rgba(0, 255, 102, 0.45)" : "rgba(255, 85, 119, 0.45)";
+    ctx.strokeStyle = ship.own
+      ? "rgba(0, 255, 102, 0.45)"
+      : "rgba(255, 85, 119, 0.45)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // 2. Дельта-крило (трикутна форма з вирізом на хвості)
     ctx.fillStyle = ship.own ? "#e9d5ff" : "#ffb3c1";
     ctx.beginPath();
-    ctx.moveTo(22, 0);                  // Ніс
-    ctx.lineTo(-18, -16);               // Ліве крило
-    ctx.lineTo(-9, -6);                 // Виріз хвоста (зліва)
-    ctx.lineTo(-9, 6);                  // Виріз хвоста (справа)
-    ctx.lineTo(-18, 16);                // Праве крило
+    ctx.moveTo(22, 0); // Ніс
+    ctx.lineTo(-18, -16); // Ліве крило
+    ctx.lineTo(-9, -6); // Виріз хвоста (зліва)
+    ctx.lineTo(-9, 6); // Виріз хвоста (справа)
+    ctx.lineTo(-18, 16); // Праве крило
     ctx.closePath();
     ctx.fill();
 
