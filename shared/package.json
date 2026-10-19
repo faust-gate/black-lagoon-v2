@@ -1,0 +1,20 @@
+{
+  "name": "@fpv/shared",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./sim": "./src/sim/index.ts",
+    "./codec": "./src/codec/index.ts",
+    "./protocol": "./src/protocol/index.ts",
+    "./net": "./src/net/latency.ts"
+  },
+  "scripts": {
+    "test": "vitest run --root .. --project shared",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

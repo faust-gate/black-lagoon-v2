@@ -1,0 +1,396 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #0b0612; /* Темно-фіолетовий фон */
+  color: #f3e8ff; /* Світло-бузковий текст */
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+#game {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #0d0718;
+}
+.panel {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  padding: 22px;
+  border: 1px solid rgba(168, 85, 247, 0.35); /* Фіолетова рамка */
+  border-radius: 16px;
+  background: rgba(14, 8, 23, 0.94);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 35px rgba(168, 85, 247, 0.15); /* Фіолетове світіння */
+  backdrop-filter: blur(14px);
+}
+.loading-panel {
+  top: 72%;
+  text-align: center;
+}
+.loading-panel p {
+  margin: 0 0 12px;
+  color: #e9d5ff;
+}
+.loading-panel small {
+  display: block;
+  margin-top: 10px;
+  color: #8c7a9e;
+}
+.eyebrow {
+  color: #00ff66; /* Неоновий зелений заголовок */
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 800;
+}
+.lobby h1 {
+  margin: 6px 0 18px;
+  font-size: 26px;
+}
+.field {
+  display: grid;
+  gap: 7px;
+  color: #b8a5d1;
+  font-size: 13px;
+}
+.field input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 9px;
+  background: #120a1f;
+  color: #fff;
+  outline: none;
+}
+.field input:focus {
+  border-color: #00ff66;
+  box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.15);
+}
+.lobby-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 17px 0 8px;
+  font-size: 13px;
+  color: #b8a5d1;
+}
+.room-list {
+  display: grid;
+  gap: 8px;
+  max-height: 230px;
+  overflow: auto;
+}
+.room-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border: 1px solid rgba(168, 85, 247, 0.15);
+  border-radius: 10px;
+  background: rgba(168, 85, 247, 0.03);
+}
+.room-card:has(input:checked) {
+  border-color: #00ff66;
+  background: rgba(0, 255, 102, 0.08);
+}
+.room-card input {
+  accent-color: #00ff66;
+}
+.room-main {
+  display: grid;
+  gap: 2px;
+}
+.room-main small {
+  color: #8c7a9e;
+}
+.room-count {
+  color: #00ff66;
+  font:
+    12px ui-monospace,
+    monospace;
+}
+.primary-button {
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 16px;
+  background: #00ff66; /* Неонова зелена кнопка */
+  color: #0b0612;
+  font-weight: 800;
+}
+.primary-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.ghost-button,
+.failure-actions button {
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 8px;
+  background: rgba(168, 85, 247, 0.08);
+  color: #e9d5ff;
+  padding: 7px 10px;
+}
+.status {
+  min-height: 18px;
+  font-size: 12px;
+  color: #a7f3d0;
+}
+.status[data-kind="error"] {
+  color: #ff5577;
+}
+.failure-gallery {
+  margin-top: 16px;
+  border-top: 1px solid rgba(168, 85, 247, 0.15);
+  padding-top: 12px;
+  color: #b8a5d1;
+  font-size: 12px;
+}
+.failure-gallery summary {
+  cursor: pointer;
+}
+.failure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 10px 0;
+}
+.failure-gallery pre {
+  white-space: pre-wrap;
+  max-height: 110px;
+  overflow: auto;
+  padding: 9px;
+  border-radius: 8px;
+  background: #08040f;
+  color: #e9d5ff;
+  font-size: 11px;
+}
+.hud {
+  position: absolute;
+  z-index: 4;
+  inset: 20px auto auto 20px;
+  min-width: 300px;
+  padding: 14px 16px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 10px;
+  background: rgba(12, 7, 20, 0.82);
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.15);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+}
+.stats,
+.controls {
+  display: grid;
+  gap: 5px;
+  font-size: 13px;
+}
+.stats {
+  color: #00ff66; /* Неоново-зелені показники */
+}
+.stats b {
+  color: #fff;
+}
+.controls {
+  margin-top: 9px;
+  color: #b8a5d1;
+}
+.experiment {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #ffcf66;
+}
+.crosshair {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(0, 255, 102, 0.5); /* Зелений приціл */
+  border-radius: 50%;
+  pointer-events: none;
+}
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(0, 255, 102, 0.6);
+}
+.crosshair::before {
+  left: 15px;
+  top: -8px;
+  width: 1px;
+  height: 48px;
+}
+.crosshair::after {
+  left: -8px;
+  top: 15px;
+  width: 48px;
+  height: 1px;
+}
+.vignette {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.8);
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 650px) {
+  .hud {
+    inset: 10px auto auto 10px;
+    min-width: 250px;
+  }
+  .loading-panel {
+    top: 75%;
+  }
+}
+
+.create-room {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.create-room input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  background: #120a1f;
+  color: #fff;
+  outline: none;
+}
+.chat {
+  position: absolute;
+  z-index: 5;
+  right: 20px;
+  bottom: 20px;
+  width: min(320px, calc(100vw - 40px));
+  padding: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 10px;
+  background: rgba(12, 7, 20, 0.85);
+  backdrop-filter: blur(8px);
+  font-size: 13px;
+}
+.chat-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+.chat-head .status {
+  min-height: 0;
+  font-size: 11px;
+}
+.roster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+.roster li {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.2);
+  color: #e9d5ff;
+  font-size: 12px;
+}
+.chat-log {
+  height: 120px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 8px;
+  background: #08040f;
+  color: #e9d5ff;
+}
+.chat-line.error {
+  color: #ff5577;
+}
+.chat-form input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 8px;
+  background: #120a1f;
+  color: #fff;
+  outline: none;
+}
+.chat-form input:focus {
+  border-color: #00ff66;
+}
+
+.netgraph {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  border-radius: 8px;
+  background: rgba(12, 7, 20, 0.85);
+  color: #a7f3d0;
+  font:
+    12px/1.45 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  pointer-events: none;
+}
+
+.netgraph[hidden] {
+  display: none;
+}
+
+.netgraph pre {
+  margin: 0 0 6px;
+  white-space: pre;
+}
+
+.netgraph canvas {
+  display: block;
+  width: 240px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.netgraph small {
+  color: #6ee7b7;
+}

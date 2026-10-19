@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Typecheck (strict, every package)
+        run: npm run typecheck
+      - name: Lint (type-checked ESLint)
+        run: npm run lint
+      - name: Format
+        run: npm run format:check
+      - name: Tests with coverage (thresholds enforced)
+        run: npm run test:coverage
+      - name: Build
+        run: npm run build
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end (two real browsers against the real server)
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports
+          path: |
+            coverage/
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
