@@ -244,7 +244,7 @@ function drawBullet(
     return;
 
   ctx.save();
-  ctx.fillStyle = "#00ff66"; // Неоново-зелені кулі
+  ctx.fillStyle = "#ffe628";
   ctx.beginPath();
   ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
   ctx.fill();
@@ -291,7 +291,7 @@ function drawPickup(ctx: Ctx, pickup: PickupView, now: number): void {
 /** Particles are drawn without save()/restore() per particle: only alpha changes, and it is reset once. */
 function drawParticles(ctx: Ctx, effects: Effects): void {
   if (effects.activeCount === 0) return;
-  ctx.fillStyle = "#00ff66"; // Зелені частинки вибухів/ефектів
+  ctx.fillStyle = "#ff8c20"; // частинки вибухів/ефектів
   for (const particle of effects.particles) {
     if (!particle.active) continue;
     ctx.globalAlpha = Math.max(0, particle.life / MAX_LIFE);
