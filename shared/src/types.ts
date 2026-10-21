@@ -73,6 +73,8 @@ export interface ShipView extends ViewBase {
   readonly kind: "ship";
   readonly hp: number;
   readonly score: number;
+  /** Кількість доступних самонавідних набоїв. */
+  readonly homingAmmo: number;
   /** Bit set of SNAPSHOT_FLAGS. */
   readonly flags: number;
 }
@@ -81,6 +83,8 @@ export interface BulletView extends ViewBase {
   readonly kind: "bullet";
   readonly ownerId: EntityId;
   readonly fireSeq: Seq;
+  /** Прапорець самонаведення: 1 = самонавідна куля, 0 = звичайна. */
+  readonly homing: 0 | 1;
 }
 
 export interface AsteroidView extends ViewBase {
@@ -91,8 +95,8 @@ export interface AsteroidView extends ViewBase {
 
 export interface PickupView extends ViewBase {
   readonly kind: "pickup";
-  /** Index into PICKUP_TYPES. */
-  readonly pickupType: 0 | 1;
+  /** Index into PICKUP_TYPES: 0 = shield, 1 = rapid-fire, 2 = homing-ammo. */
+  readonly pickupType: 0 | 1 | 2;
 }
 
 /** Discriminated union: checking `kind` narrows to exactly one member. */

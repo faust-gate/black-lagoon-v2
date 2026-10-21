@@ -145,13 +145,13 @@ function drawSprite(
 function drawShip(
   ctx: Ctx,
   ship: ShipView,
-  assets: Pick<Assets, "images">,
+  _assets: Pick<Assets, "images">,
   now: number,
 ): void {
   if (!ship.active) {
     ctx.save();
     ctx.translate(ship.x, ship.y);
-    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
     ctx.beginPath();
     ctx.arc(0, 0, 30, 0, Math.PI * 2);
     ctx.stroke();
@@ -159,51 +159,48 @@ function drawShip(
     return;
   }
 
-  const frame = ship.shield ? (ship.thrust ? 3 : 2) : ship.thrust ? 1 : 0;
-  if (
-    !drawSprite(
-      ctx,
-      assets.images.get("ship"),
-      frame,
-      ship.x,
-      ship.y,
-      ship.angle,
-      64,
-    )
-  ) {
-    // Стара векторна модель літака (якщо немає спрайта)
-    ctx.save();
-    ctx.translate(ship.x, ship.y);
-    ctx.rotate(ship.angle);
+  // Векторна модель літака (чистий неоновий трикутник)
+  ctx.save();
+  ctx.translate(ship.x, ship.y);
+  ctx.rotate(ship.angle);
 
-    // 1. Контурне коло навколо літака
+  // 1. Полум'я двигуна при прискоренні
+  if (ship.thrust) {
     ctx.beginPath();
-    ctx.arc(0, 0, 24, 0, Math.PI * 2);
-    ctx.strokeStyle = ship.own
-      ? "rgba(0, 255, 102, 0.45)"
-      : "rgba(255, 85, 119, 0.45)";
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // 2. Дельта-крило (трикутна форма з вирізом на хвості)
-    ctx.fillStyle = ship.own ? "#e9d5ff" : "#ffb3c1";
-    ctx.beginPath();
-    ctx.moveTo(22, 0); // Ніс
-    ctx.lineTo(-18, -16); // Ліве крило
-    ctx.lineTo(-9, -6); // Виріз хвоста (зліва)
-    ctx.lineTo(-9, 6); // Виріз хвоста (справа)
-    ctx.lineTo(-18, 16); // Праве крило
-    ctx.closePath();
+    ctx.moveTo(-10, -5);
+    ctx.lineTo(-22, 0);
+    ctx.lineTo(-10, 5);
+    ctx.fillStyle = "#ff5500";
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "#ff5500";
     ctx.fill();
-
-    // 3. Крапка біля носа літака
-    ctx.fillStyle = "#0b0612";
-    ctx.beginPath();
-    ctx.arc(12, 3, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
   }
+
+  // 2. Гострий трикутний корпус
+  const neonColor = ship.own ? "#00ff66" : "#a855f7";
+  ctx.beginPath();
+  ctx.moveTo(18, 0); // Ніс
+  ctx.lineTo(-14, -13); // Ліве крило
+  ctx.lineTo(-7, 0); // Сопло
+  ctx.lineTo(-14, 13); // Праве крило
+  ctx.closePath();
+
+  ctx.fillStyle = "#0b0612";
+  ctx.fill();
+
+  ctx.strokeStyle = neonColor;
+  ctx.lineWidth = 2;
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = neonColor;
+  ctx.stroke();
+
+  // 3. Маркер кабіни
+  ctx.beginPath();
+  ctx.arc(2, 0, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = neonColor;
+  ctx.fill();
+
+  ctx.restore();
 
   if (!ship.own) {
     ctx.save();
@@ -228,28 +225,30 @@ function drawShip(
 function drawBullet(
   ctx: Ctx,
   bullet: BulletView,
-  assets: Pick<Assets, "images">,
-  now: number,
+  _assets: Pick<Assets, "images">,
+  _now: number,
 ): void {
-  const frame = Math.floor(now / 90) % 2;
-  if (
-    drawSprite(
-      ctx,
-      assets.images.get("bullet"),
-      frame,
-      bullet.x,
-      bullet.y,
-      0,
-      24,
-    )
-  )
-    return;
-
   ctx.save();
-  ctx.fillStyle = "#ffe628";
-  ctx.beginPath();
-  ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
-  ctx.fill();
+  const bulletExt = bullet as unknown as { homing?: number };
+  const isHoming = Boolean(bulletExt.homing);
+
+  if (isHoming) {
+    // Неоново-рожева самонавідна куля
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = "#ff007f";
+    ctx.fillStyle = "#ff55ff";
+    ctx.beginPath();
+    ctx.arc(bullet.x, bullet.y, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Звичайна неоново-зелена куля
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#00ff66";
+    ctx.fillStyle = "#00ff66";
+    ctx.beginPath();
+    ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -284,9 +283,25 @@ function drawPickup(ctx: Ctx, pickup: PickupView, now: number): void {
   ctx.save();
   ctx.translate(pickup.x, pickup.y);
   ctx.rotate(now / 600);
-  ctx.strokeStyle = pickup.pickupType === "shield" ? "#00ff66" : "#a855f7"; // Зелений та фіолетовий
-  ctx.lineWidth = 3;
-  ctx.strokeRect(-9, -9, 18, 18);
+
+  // Безпечна перевірка типу через приведення до unknown
+  const typeVal = pickup.pickupType as unknown;
+  const isShield = typeVal === 0 || typeVal === "shield";
+  const color = isShield ? "#00ff66" : "#ff55ff";
+
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = color;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = isShield
+    ? "rgba(0, 255, 102, 0.2)"
+    : "rgba(255, 85, 255, 0.2)";
+  ctx.lineWidth = 2.5;
+
+  ctx.beginPath();
+  ctx.rect(-9, -9, 18, 18);
+  ctx.fill();
+  ctx.stroke();
+
   ctx.restore();
 }
 

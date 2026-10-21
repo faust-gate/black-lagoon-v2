@@ -1,5 +1,5 @@
 import { BULLET, SHIP } from "../constants.ts";
-import type { SequencedCommand, Seq, Vec2 } from "../types.ts";
+import type { SequencedCommand, Seq, ShipView, Vec2 } from "../types.ts";
 import { asSeq } from "../types.ts";
 import { Bullet } from "./bullet.ts";
 import { Entity } from "./entity.ts";
@@ -16,6 +16,7 @@ export class Ship extends Entity {
   fireCooldown = 0;
   shield = 0;
   rapidFire = 0;
+  homingAmmo = 0; // Лічильник самонавідних набоїв
 
   constructor(pos: Vec2 = { x: 0, y: 0 }) {
     super({ pos, radius: SHIP.radius });
@@ -51,8 +52,16 @@ export class Ship extends Entity {
   fire(world: World, fireSeq: Seq = asSeq(0)): Bullet | null {
     if (this.respawnTimer > 0 || this.fireCooldown > 0) return null;
 
+    const isHoming = this.homingAmmo > 0;
+    if (isHoming) {
+      this.homingAmmo -= 1;
+    }
+
     const { pos, vel } = bulletLaunch(this);
-    const bullet = world.spawn(new Bullet(pos, vel, this.id, fireSeq));
+    const bullet = world.spawn(
+      new Bullet(pos, vel, this.id, fireSeq, isHoming),
+    );
+
     this.fireCooldown =
       this.rapidFire > 0 ? BULLET.rapidCooldown : BULLET.cooldown;
     world.bus.emit("fired", { shipId: this.id, bulletId: bullet.id });
@@ -86,6 +95,9 @@ export class Ship extends Entity {
     this.vel.x = 0;
     this.vel.y = 0;
     this.thrust = 0;
+    this.shield = 0;
+    this.rapidFire = 0;
+    this.homingAmmo = 0;
   }
 
   respawn(world: World): void {
@@ -95,5 +107,30 @@ export class Ship extends Entity {
     this.angle = world.rng.range(0, Math.PI * 2);
     this.hp = SHIP.maxHp;
     this.invulnerable = SHIP.invulnerableSeconds;
+    this.shield = 0;
+    this.rapidFire = 0;
+    this.homingAmmo = 0;
+  }
+
+  toView(): ShipView {
+    let flags = 0;
+    if (this.thrust > 0) flags |= 1;
+    if (this.invulnerable > 0) flags |= 2;
+    if (this.shield > 0) flags |= 4;
+    if (this.rapidFire > 0) flags |= 8;
+
+    return {
+      kind: "ship",
+      id: this.id,
+      x: this.pos.x,
+      y: this.pos.y,
+      vx: this.vel.x,
+      vy: this.vel.y,
+      angle: this.angle,
+      hp: this.hp,
+      score: this.score,
+      homingAmmo: this.homingAmmo,
+      flags,
+    };
   }
 }

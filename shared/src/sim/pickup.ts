@@ -2,7 +2,7 @@ import type { Vec2 } from "../types.ts";
 import { Entity } from "./entity.ts";
 import type { Ship } from "./ship.ts";
 
-export const PICKUP_TYPES = ["shield", "rapid-fire"] as const;
+export const PICKUP_TYPES = ["shield", "rapid-fire", "homing-ammo"] as const;
 export type PickupType = (typeof PICKUP_TYPES)[number];
 
 export class Pickup extends Entity {
@@ -27,6 +27,9 @@ export class Pickup extends Entity {
         break;
       case "rapid-fire":
         ship.rapidFire = 8;
+        break;
+      case "homing-ammo":
+        ship.homingAmmo += 5;
         break;
       default:
         return assertNeverPickup(this.pickupType);

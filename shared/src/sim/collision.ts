@@ -1,6 +1,6 @@
 import type { EntityKind } from "../types.ts";
-import type { Bullet } from "./bullet.ts";
 import type { Asteroid } from "./asteroid.ts";
+import type { Bullet } from "./bullet.ts";
 import { PICKUP_TYPES, Pickup } from "./pickup.ts";
 import type { Ship } from "./ship.ts";
 import type { AnyEntity, World } from "./world.ts";
@@ -90,7 +90,19 @@ function hitShip(bullet: Bullet, ship: Ship, world: World): void {
       damage: bullet.damage,
       hp: ship.hp,
     });
-    if (ship.hp <= 0) world.addScore(bullet.ownerId, 100, "ship-destroyed");
+    if (ship.hp <= 0) {
+      world.addScore(bullet.ownerId, 100, "ship-destroyed");
+      world.bus.emit("exploded", {
+        kind: "ship",
+        id: ship.id,
+        x: ship.pos.x,
+        y: ship.pos.y,
+      });
+
+      // Гарантований спавн луту при вибуху ворожого корабля
+      const type = PICKUP_TYPES[world.rng.int(PICKUP_TYPES.length)] ?? "shield";
+      world.spawn(new Pickup({ x: ship.pos.x, y: ship.pos.y }, type));
+    }
   }
   bullet.markDead();
 }
@@ -107,7 +119,8 @@ function hitAsteroid(bullet: Bullet, asteroid: Asteroid, world: World): void {
     y: asteroid.pos.y,
   });
 
-  if (world.rng.chance(0.2)) {
+  // 40% шанс випадання луту (щит / rapid-fire / homing-ammo) при знищенні астероїда
+  if (world.rng.chance(0.4)) {
     const type = PICKUP_TYPES[world.rng.int(PICKUP_TYPES.length)] ?? "shield";
     world.spawn(new Pickup({ x: asteroid.pos.x, y: asteroid.pos.y }, type));
   }
