@@ -75,9 +75,8 @@ export class Ship extends Entity {
       return false;
     }
 
-    this.hp -= amount;
+    this.hp = Math.max(0, this.hp - amount);
     if (this.hp <= 0) {
-      this.hp = 0;
       this.destroy(world);
     }
     return true;

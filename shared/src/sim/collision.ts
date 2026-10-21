@@ -68,8 +68,20 @@ export function resolveCollisions(world: World): void {
     }
     const shipAsteroid = ordered(a, b, "ship", "asteroid");
     if (shipAsteroid) {
-      const [ship] = shipAsteroid;
+      const [ship, asteroid] = shipAsteroid;
+
+      // 1. Астероїд знищується при зіткненні з кораблем
+      asteroid.markDead();
+      world.bus.emit("exploded", {
+        kind: "asteroid",
+        id: asteroid.id,
+        x: asteroid.pos.x,
+        y: asteroid.pos.y,
+      });
+
+      // 2. Корабель отримує 20 шкоди і 1 секунду невразливості
       if (ship.takeDamage(20, world)) {
+        ship.invulnerable = 1.0;
         world.bus.emit("hit", {
           target: "ship",
           shipId: ship.id,
@@ -77,6 +89,7 @@ export function resolveCollisions(world: World): void {
           hp: ship.hp,
         });
       }
+      continue;
     }
   }
 }
