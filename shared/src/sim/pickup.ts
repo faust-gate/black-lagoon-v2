@@ -1,4 +1,4 @@
-import type { Vec2 } from "../types.ts";
+import type { PickupView, Vec2 } from "../types.ts";
 import { Entity } from "./entity.ts";
 import type { Ship } from "./ship.ts";
 
@@ -35,6 +35,20 @@ export class Pickup extends Entity {
         return assertNeverPickup(this.pickupType);
     }
     this.markDead();
+  }
+
+  toView(): PickupView {
+    const typeIndex = PICKUP_TYPES.indexOf(this.pickupType);
+    return {
+      kind: "pickup",
+      id: this.id,
+      x: this.pos.x,
+      y: this.pos.y,
+      vx: this.vel.x,
+      vy: this.vel.y,
+      angle: this.angle,
+      pickupType: (typeIndex >= 0 ? typeIndex : 0) as 0 | 1 | 2,
+    };
   }
 }
 

@@ -7,6 +7,13 @@ export interface HudElements {
   shieldEl?: HTMLElement;
 }
 
+const SHIP_FLAGS = {
+  THRUST: 1,
+  INVULNERABLE: 2,
+  SHIELD: 4,
+  RAPID_FIRE: 8,
+} as const;
+
 export function attachHudEvents(
   game: GameClient,
   { scoreEl, eventEl, ammoEl, shieldEl }: HudElements,
@@ -26,7 +33,7 @@ export function attachHudEvents(
     }),
   ];
 
-  // Періодичне оновлення лічильників HUD (щит та набої) для власного корабля
+  // Періодичне оновлення лічильників HUD для власного корабля
   const updateInterval = setInterval(() => {
     const worldView = (
       game as unknown as {
@@ -34,21 +41,30 @@ export function attachHudEvents(
           ships?: Array<{
             own?: boolean;
             homingAmmo?: number;
-            shield?: number;
+            flags?: number;
           }>;
         };
       }
     ).view;
+
     const ownShip = worldView?.ships?.find((s) => s.own);
 
-    if (ammoEl) {
-      const ammo = ownShip?.homingAmmo ?? 0;
-      ammoEl.textContent = ammo > 0 ? `HOMING AMMO: ${ammo}` : "";
-    }
+    if (ownShip) {
+      const flags = ownShip.flags ?? 0;
+      const hasShield = (flags & SHIP_FLAGS.SHIELD) !== 0;
+      const hasRapid = (flags & SHIP_FLAGS.RAPID_FIRE) !== 0;
+      const homingAmmo = ownShip.homingAmmo ?? 0;
 
-    if (shieldEl) {
-      const shield = ownShip?.shield ?? 0;
-      shieldEl.textContent = shield > 0 ? `SHIELD ACTIVE` : "";
+      if (shieldEl) {
+        shieldEl.textContent = hasShield ? "SHIELD ACTIVE" : "";
+      }
+
+      if (ammoEl) {
+        const parts: string[] = [];
+        if (homingAmmo > 0) parts.push(`HOMING: ${homingAmmo}`);
+        if (hasRapid) parts.push("RAPID FIRE");
+        ammoEl.textContent = parts.join(" | ");
+      }
     }
   }, 100);
 
